@@ -18,20 +18,26 @@
             margin: 20px;
         }
         .gallery img {
-            width: 45%; /* 每行两张图片，所以设置为45%以适应一些边距 */
+            width: 45%;
             margin: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 8px;
         }
         audio {
             margin-top: 20px;
+            display: none;
+        }
+        /* 新增加载提示样式 */
+        #audioHint {
+            color: red;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
     <h1>图片展示</h1>
     <div class="gallery">
-        <!-- 使用循环概念展示图片，但HTML本身不支持循环，因此手动列出 -->
         <img src="1.jpg" alt="图片1">
         <img src="2.jpg" alt="图片2">
         <img src="3.jpg" alt="图片3">
@@ -43,9 +49,51 @@
         <img src="9.jpg" alt="图片9">
         <img src="10.jpg" alt="图片10">
     </div>
-    <audio autoplay loop>
+    
+    <button onclick="playAudio()">播放音乐</button>
+    <div id="audioHint">请点击页面任意位置后重试播放</div>
+    
+    <!-- 修改点1：增加 preload 属性和 muted 属性 -->
+    <audio id="backgroundMusic" loop preload="auto" muted>
         <source src="jgj.mp3" type="audio/mpeg">
         您的浏览器不支持音频播放。
     </audio>
+
+    <script>
+        // 修改点2：添加全局点击监听
+        document.addEventListener('click', function() {
+            const audio = document.getElementById('backgroundMusic')
+            if(audio.muted) {
+                audio.muted = false
+                audio.play().catch(e => console.log('需要用户手势'))
+            }
+        })
+
+        // 修改点3：增强播放函数
+        function playAudio() {
+            const audio = document.getElementById('backgroundMusic')
+            const hint = document.getElementById('audioHint')
+            
+            audio.play()
+                .then(() => {
+                    console.log('音频播放成功')
+                    audio.style.display = 'none' // 保持隐藏状态
+                    hint.style.display = 'none'
+                })
+                .catch((error) => {
+                    console.error('播放失败:', error)
+                    hint.style.display = 'block'
+                    // 自动尝试解除静音
+                    audio.muted = false
+                })
+        }
+
+        // 修改点4：页面加载完成后自动尝试播放（受限浏览器策略）
+        window.onload = function() {
+            const audio = document.getElementById('backgroundMusic')
+            audio.muted = true  // 静音状态下尝试自动播放
+            audio.play().catch(e => console.log('需要用户交互'))
+        }
+    </script>
 </body>
 </html>
